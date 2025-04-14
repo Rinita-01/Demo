@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <!-- Page Content -->
+    <div class="page-heading contact-heading header-text">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="text-content">
+                <h4>our publishers</h4>
+                <h2>let’s know about them</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    <div class="team-members">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="section-heading">
+                        <h2>Our Publishers</h2>
+                    </div>
+                </div>
+
+                {% for publisher in publishers %}
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <div class="thumb-container">
+                            <div class="hover-effect">
+                                <div class="hover-content">
+                                    <ul class="social-icons">
+                                        {% if publisher.website %}
+                                            <li><a href="{{ publisher.website }}" target="_blank"><i class="fa fa-globe"></i></a></li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="down-content">
+                            <h4>{{ publisher.name }}</h4>
+                            <span>Publisher</span>
+                            <p><strong>Address:</strong> {{ publisher.address }}</p>
+                            <p><strong>Contact:</strong> {{ publisher.contact }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

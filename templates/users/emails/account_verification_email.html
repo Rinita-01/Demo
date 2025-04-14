@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml" lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Lato|Lato:i,b,bi">
+    <meta property="og:title" content="Email template">  
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <style type="text/css">
+        body {
+            background-color: #F5F8FA;
+            font-family: 'Lato', sans-serif;
+            color: #33475B;
+            margin: 0;
+            padding: 0;
+        }
+
+        #email {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: white;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }  
+
+        .header {
+            background: linear-gradient(135deg, #50b3c5, #50b3c5);
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .content {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .content h2 {
+            color: #50b3c5;
+            margin-bottom: 10px;
+        }
+
+        .content p {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .activate-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #50b3c5, #50b3c5);
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 12px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: 0.3s;
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .activate-btn:hover {
+            background: linear-gradient(135deg, #50b3c5, #50b3c5);
+            transform: scale(1.05);
+        }
+
+        .footer {
+            background-color: #50b3c5;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>    
+</head>    
+
+<body>
+    <div id="email">
+        <!-- Header -->
+        <div class="header">
+            <img alt="Logo" src="{% static 'images/logo.png'%}">
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <h2>Activate Your Account</h2>
+            <p>Please verify your email address to activate your account.</p>
+            <a href="http://{{ domain }}{% url 'activate' uidb64=uid token=token %}" class="activate-btn">Activate Now</a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>© {% now "Y" %} Timeless Pages, All Rights Reserved.</p>
+            <a href="http://{{ domain }}">Visit Website</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section style="padding-top: 120px; padding-bottom: 50px;">
+    <div class="d-flex justify-content-center align-items-center">
+        <div class="col-md-8">
+            <div class="col-md-12 text-center">
+                <div class="section-heading">
+                    <h2>My Account</h2>
+                </div>
+
+                <!-- Profile Picture -->
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle mb-3" width="150">
+                {% else %}
+                    <img src="/static/images/default-profile.png" alt="Default Profile" class="rounded-circle mb-3" width="150">
+                {% endif %}
+
+                <!-- User Info -->
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                <p><strong>Phone:</strong> {{ user.phone|default:"Not Provided" }}</p>
+                <p><strong>Address:</strong> {{ user.address|default:"Not Provided" }}</p>
+                <p><strong>Joined on:</strong> {{ user.date_joined|date:"F d, Y" }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Empty Cart{% endblock title %}
+
+{% block content %}
+
+<div class="page-heading about-heading header-text">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="text-content">
+            <h4>Order</h4>
+            <h2>Our Books</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+<div class="container text-center my-5">
+    <h2 class="mb-4">Your Cart is Empty</h2>
+    <p class="lead">Looks like you haven't added anything to your cart yet.</p>
+    <img src="{% static 'images/empty_cart.png' %}" alt="Empty Cart" class="img-fluid my-4" style="max-width: 300px;">
+    <br>
+    <a href="{% url 'show_books' %}" class="btn btn-primary">Browse Books</a>
+</div>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Page Content -->
+<!-- Banner Starts Here -->
+<div class="banner header-text">
+	<div class="owl-banner owl-carousel">
+		<div class="banner-item-01">
+			<div class="text-content">
+				<h4>Best Offer</h4>
+				<h2>New Arrivals On Sale</h2>
+			</div>
+		</div>
+		<div class="banner-item-02">
+			<div class="text-content">
+				<h4>Flash Deals</h4>
+				<h2>Get your best products</h2>
+			</div>
+		</div>
+		<div class="banner-item-03">
+			<div class="text-content">
+				<h4>Last Minute</h4>
+				<h2>Grab last minute deals</h2>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- <div class="banner header-text">
+		<div class="owl-banner owl-carousel">
+			{% for book in books %}
+			<div class="banner-item">
+				<img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="banner-image">
+				<div class="text-content">
+					<h4>New Arrival</h4>
+					<h2>{{ book.title }}</h2>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>	 -->
+<!-- Banner Ends Here -->
+
+<div class="products">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="filters">
+					<ul>
+						<li class="active" data-filter="*">All Books</li>
+						<li data-filter=".featured">Featured</li>
+						<li data-filter=".bestseller">Bestsellers</li>
+						<li data-filter=".new">New Arrivals</li>
+					</ul>
+				</div>
+			</div>
+			<div class="col-md-12">
+				<div class="filters-content">
+					<div class="row grid">
+						{% for book in books %}
+						<div
+							class="col-lg-4 col-md-4 all {% if book.stock > 50 %}featured{% elif book.stock < 10 %}bestseller{% else %}new{% endif %}">
+							<div class="product-item">
+								<a href="{% url 'order_form' book.id book.category.id %}"><img
+										src="{{ book.cover_image.url }}" alt="{{ book.title }}"></a>
+								<div class="down-content">
+									<a href="#">
+										<h4>{{ book.title }}</h4>
+									</a>
+									<h6>${{ book.price }}</h6>
+									<p>{{ book.description|truncatewords:15 }}</p>
+									<ul class="stars">
+										{% for i in "12345" %}
+											{% if forloop.counter <= book.average_rating|default:0 %}
+											★
+											{% else %}
+											☆
+											{% endif %}
+										{% endfor %}
+									</ul>
+									<small>({{ book.average_rating|default:"0.0"|floatformat:1 }}/5)</small>									
+									<span><a href="{% url 'submit_review' book.id %}">Reviews</a></span>
+								</div>
+							</div>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="best-features">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="section-heading">
+					<h2>About Timeless Pages</h2>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="left-content">
+					<h4>Looking for the best books?</h4>
+					<p><a rel="nofollow" href="#" target="_parent">This
+							template</a> is free to use for your business websites. However, you have no permission to
+						redistribute the downloadable ZIP file on any template collection website. <a rel="nofollow"
+							href="https://templatemo.com/contact">Contact us</a> for more info.</p>
+					<ul class="featured-list">
+						<li><a href="#">Lorem ipsum dolor sit amet</a></li>
+						<li><a href="#">Consectetur an adipisicing elit</a></li>
+						<li><a href="#">It aquecorporis nulla aspernatur</a></li>
+						<li><a href="#">Corporis, omnis doloremque</a></li>
+						<li><a href="#">Non cum id reprehenderit</a></li>
+					</ul>
+					<a href="#" class="filled-button">Read More</a>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="right-image">
+					<img src="{% static '/images/books.jpg' %}" alt="">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="call-to-action">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="inner-content">
+					<div class="row">
+						<div class="col-md-8">
+							<h4>Creative &amp; Unique <em>Timeless</em> Pages</h4>
+							<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque corporis amet elite
+								author nulla.</p>
+						</div>
+						<div class="col-md-4">
+							<a href="{% url 'show_books' %}" class="filled-button">Purchase Now</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}

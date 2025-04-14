@@ -1,0 +1,87 @@
+1. User Features
+User Registration and Login using Django authentication.
+Profile Management: Allow users to update their name, phone number, and address.
+Password Reset and Change using email verification.
+User Dashboard displaying orders, wishlist, and recent reviews.
+Admin Panel Access for superusers to manage all entities.
+
+2. Category Features
+View book categories.
+Filter books by categories.
+Admin can add, update, or delete categories using the admin panel.
+
+3. Author Features
+Display author profiles with biography and list of their books.
+Admin can add or update author details.
+
+4. Publisher Features
+Display publisher details.
+Admin can add or update publisher information.
+
+5. Book Features
+Book Listing Page with search, filter, and sort options.
+Book Detail Page showing title, author, publisher, description, price, and reviews.
+Book Recommendations based on categories or previous purchases.
+Book Availability status.
+Option to Add to Cart or Add to Wishlist.
+
+6. Review Features
+Users can write reviews and give ratings (1-5 stars).
+Display average ratings and reviews on the book detail page.
+Users can edit or delete their reviews.
+Admin can monitor and delete inappropriate reviews.
+
+7. Cart Features
+Add, update, or remove books from the cart.
+Calculate total price.
+Option to proceed to checkout.
+
+8. Wishlist Features
+Users can add books to their wishlist for future purchases.
+Remove books from the wishlist.
+Option to move a book from the wishlist to the cart.
+
+9. Order Features
+Users can place orders after providing shipping details.
+Track order status (Pending, Confirmed, Shipped, Delivered).
+View order history.
+Cancel orders (if the status is not yet shipped).
+Admin can manage and update order status.
+
+10. OrderItem Features
+Display all books within an order.
+Track order-specific book prices and quantities.
+
+11. Payment Features
+Users can make payments using different payment methods (e.g., credit card, debit card, UPI, or Net Banking).
+Payment confirmation via email.
+Refund process initiation if an order is canceled or returned.
+Admin can view payment transactions.
+
+12. Shipment Features
+Provide tracking information for users.
+Display estimated delivery date.
+Update shipment status.
+Send delivery notifications.
+
+13. Return Request Features
+Users can request a return within a set time period.
+Provide reasons for return.
+Admin can accept or reject return requests.
+Track the status of return requests.
+
+Additional Features:
+Note 1: Recommendation System using user preferences or book categories.
+Note 2: Coupons and Discounts for promotional offers.
+
+
+
+<div>
+                            {% if review.user.profile_picture %}
+                            <img src="{{ review.user.profile_picture.url }}" alt="Profile Picture"
+                                class="rounded-circle mb-3" width="80">
+                            {% else %}
+                            <img src="/static/images/default-profile.png" alt="Default Profile"
+                                class="rounded-circle mb-3" width="80">
+                            {% endif %}
+                        </div>

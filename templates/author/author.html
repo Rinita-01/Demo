@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <!-- Page Content -->
+    <div class="page-heading about-heading header-text">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="text-content">
+                <h4>about us</h4>
+                <h2>our authors</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    <div class="team-members">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="section-heading">
+                        <h2>Our Authors</h2>
+                    </div>
+                </div>
+                
+                {% for author in authors %}
+                <div class="col-md-4">
+                    <div class="team-member">
+                        <div class="thumb-container">
+                            {% if author.photo %}
+                                <img src="{{ author.photo.url }}" alt="{{ author.name }}" class="img-fluid">
+                            {% else %}
+                                <img src="assets/images/default-author.jpg" alt="Default Author Image" class="img-fluid">
+                            {% endif %}
+                            <div class="hover-effect">
+                                <div class="hover-content">
+                                    <ul class="social-icons">
+                                        <li><a href="#"><i class="fa-brands fa-facebook"></i></i></a></li>
+                                        <li><a href="#"><i class="fa-brands fa-twitter"></i></i></a></li>
+                                        <li><a href="#"><i class="fa-brands fa-linkedin"></i></a></li>
+                                        <li><a href="#"><i class="fa-brands fa-behance"></i></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="down-content">
+                            <h4>{{ author.name }}</h4>
+                            <span>Author</span>
+                            <p>{{ author.bio|truncatewords:20 }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

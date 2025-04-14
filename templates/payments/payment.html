@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Page Content -->
+<div class="page-heading contact-heading header-text">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="text-content">
+          <h4>our publishers</h4>
+          <h2>let’s know about them</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Page Content Ends -->
+<div class="team-members">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="section-heading">
+          <h2>Payment</h2>
+        </div>
+      </div>
+
+      <div class="col-md-12">
+        <div class="section-heading">
+          <form id="payment-form" method="POST" action="">
+            {% csrf_token %}
+            <div class="form-group">
+              <input type="hidden" name="book_id" value="{{ book_id }}">
+              <input type="hidden" name="category_id" value="{{ category_id }}">
+              <input type="hidden" name="quantity" value="{{ quantity }}">
+              <input type="hidden" name="amount" value="{{ amount }}">
+              <label>Amount (INR):</label>
+              <input type="number" id="amount" name="amount" class="form-control" value="{{ amount }}" disabled/>
+            </div>
+            <button id="pay-button" class="btn btn-success">Pay Now</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

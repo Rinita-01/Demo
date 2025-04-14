@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="page-heading about-heading header-text">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="text-content">
+            <h4>Login to</h4>
+            <h2>Your Account</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section style="padding-top: 120px; padding-bottom: 50px;">
+    <div class="d-flex justify-content-center align-items-center">
+        <div class="col-md-8"> 
+            <div class="col-md-12 text-center">
+                <div class="section-heading">
+                    <h2>Login</h2>
+                </div>
+            </div>
+            <div class="contact-form shadow-lg p-4 bg-white rounded">
+                <form id="customer-registration-form" action="" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-lg-12 mb-3">
+                            <label for="email">Email</label>
+                            <input name="email" type="email" class="form-control" id="email" placeholder="Email" required>
+                        </div>
+                        <div class="col-lg-12 mb-3">
+                            <label for="password">Password</label>
+                            <input name="password" type="password" class="form-control" id="password" placeholder="Password" required>
+                        </div>
+                        <div class="col-lg-12">
+                            <button type="submit" id="login-btn" class="filled-button">Login</button>
+                            <small style="padding-left: 10px;">New to ShoppinglyX? <a href="{% url 'customer_registration' %}" class="text-danger">Create an Account</a> </small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+

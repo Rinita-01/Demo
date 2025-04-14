@@ -1,0 +1,14 @@
+1.	Category:	name
+2.	Author:		name
+3.	Publisher:	name
+4.	Book:		title + (Author+Category+Publisher)
+5.	User:		email	
+6.	Customer:	(User)user
+7.	Review:		(User)user + Book(title)
+8.	Cart:		(User)user + Book(title)
+9.	Wishlist:	(User)user + Book(title)
+10.	Orders:		(User)user
+11.	OrderItem:	(Order) + Book
+12.	Payment:	(User)user + Order
+13.	Shipment:	(Order)
+14.	ReturnRequest:	(Order) + User

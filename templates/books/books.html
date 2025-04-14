@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+
+<!-- Page Content -->
+<div class="page-heading products-heading header-text">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="text-content">
+                    <h4>new arrivals</h4>
+                    <h2>Timeless Pages</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="products">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="filters">
+                    <ul>
+                        <li class="active" data-filter="*">All Books</li>
+                        <li data-filter=".featured">Featured</li>
+                        <li data-filter=".bestseller">Bestsellers</li>
+                        <li data-filter=".new">New Arrivals</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="filters-content">
+                    <div class="row grid">
+                        {% for book in page_obj %}
+                        <div
+                            class="col-lg-4 col-md-4 all {% if book.stock > 50 %}featured{% elif book.stock < 10 %}bestseller{% else %}new{% endif %}">
+                            <div class="product-item">
+                                <a href="{% url 'order_form' book.id book.category.id %}">
+                                    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+                                </a>
+                                <div class="down-content">
+                                    <a href="#">
+                                        <h4>{{ book.title }}</h4>
+                                    </a>
+                                    <h6>${{ book.price }}</h6>
+                                    <p>{{ book.description|truncatewords:15 }}</p>
+                                    <ul class="stars">
+										{% for i in "12345" %}
+											{% if forloop.counter <= book.average_rating|default:0 %}
+											<i class="fa fa-star text-warning"></i>
+											{% else %}
+											☆
+											{% endif %}
+										{% endfor %}
+									</ul>
+									<small>({{ book.average_rating|default:"0.0"|floatformat:1 }}/5)</small>
+                                    <span><a href="{% url 'submit_review' book.id %}">Reviews ({{ book.id|add:10 }})</a></span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <!-- Pagination Section -->
+            <div class="col-md-12">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link text-danger" href="?page=1" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link text-danger" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link text-danger" href="#" tabindex="-1" aria-disabled="true">&laquo;&laquo;</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link text-danger" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                        {% if num == page_obj.number %}
+                        <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <li
+                            class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link text-danger" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link text-danger" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
+                            </li>
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;&raquo;</a>
+                            </li>
+                            {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

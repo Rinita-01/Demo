@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+
+    <title>Timeless Pages</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+<!--
+
+TemplateMo 546 Sixteen Clothing
+
+https://templatemo.com/tm-546-sixteen-clothing
+
+-->
+
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" href="{% static '/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static '/css/templatemo-sixteen.css' %}">
+    <link rel="stylesheet" href="{% static '/css/owl.css'%}">
+
+    <!-- Font Awesome (CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> 
+    <script src="{% static 'js/validation.js' %}"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+
+    
+</head>
+<body>
+
+    
+{% include 'includes/navbar.html' %}
+
+
+{% block content %}
+
+
+{% endblock %}
+
+
+{% include 'includes/footer.html' %}
+
+
+

@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="page-heading about-heading header-text">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="text-content">
+                    <h4>Order</h4>
+                    <h2>Our Books</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Added margin-top (mt-5) for spacing -->
+<section class="section mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="left-images">
+                    {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="img-fluid">
+                    {% else %}
+                    <img src="{% static 'images/default-book.jpg' %}" alt="Default Book Image" class="img-fluid">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="right-content">
+                    <input type="hidden" name="prod_id" value="{{ book.id }}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>{{ book.title }}</h4>
+                        <a href="{% url 'add_to_wishlist' book.id %}" class="nav-link text-danger"
+                            id="add-to-wishlist-btn">
+                            {% if book.id in wishlist_books %}
+                            <i class="fa-solid fa-heart"></i>
+                            {% else %}
+                            <i class="fa-regular fa-heart"></i>
+                            {% endif %}
+                        </a>
+
+                    </div>
+
+                    <br>
+                    <p><strong>Author:</strong> {{ book.author.name }}</p>
+                    <p><strong>Category:</strong> {{ book.category.name }}</p>
+                    <p><strong>Publisher:</strong> {{ book.publisher.name }}</p>
+                    <br>
+                    <p>{{ book.description }}</p>
+                    <br>
+                    <p><strong>Stock Available:</strong> {{ book.stock }}</p>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="book_id" value="{{ book.id }}">
+                        <input type="hidden" name="category_id" value="{{ book.category.id }}">
+
+                        {% if book.stock > 0 %}
+                        <div class="quantity-content">
+                            <div class="left-content">
+                                <h6>Select Quantity</h6>
+                            </div>
+                            <div class="right-content">
+                                <div class="quantity buttons_added">
+                                    <select class="form-control" id="quantity" name="quantity" required>
+                                        <option value="">Choose Quantity</option>
+                                        {% for i in quantity_range %}
+                                        <option value="{{ i }}">{{ i }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-danger">Out of Stock</p>
+                        {% endif %}
+                        <br>
+                        <div class="total">
+                            <h4>Price: ₹<span id="book-price">{{ book.price }}</span></h4>
+                            <h4>Total: ₹<span id="total-price">0.00</span></h4>
+                            <button type="button" class="btn btn-dark mt-3 w-100" id="go-to-payment-btn">
+                                Place Order
+                            </button>
+                        </div>
+                    </form>
+                    <form id="cartForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="prod_id" value="{{ book.id }}">
+                        <button type="button" class="btn btn-primary shadow px-5 py-2 mt-3 w-100" id="add-to-cart-btn">
+                            Add to Cart
+                        </button>
+                    </form>
+                    <br>
+
+
+                    {% if book.pdf_file %}
+
+                    <button type="button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#pdfModal">
+                        Read PDF
+                    </button>
+
+
+                    <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="pdfModalLabel">PDF Preview</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <iframe src="{{ book.pdf_file.url }}#toolbar=0" width="100%"
+                                        height="700px"></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p>No PDF available for this book.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section mt-5">
+    <div class="container">
+        <div id="review-section">
+            {% for review in book.review_set.all %}
+                <div class="card mt-3">
+                    <div class="card-body" style="display: flex;">
+                        <div>
+                            {% if review.user.profile_picture %}
+                            <img src="{{ review.user.profile_picture.url }}" alt="Profile Picture"
+                                class="rounded-circle mb-3" width="80">
+                            {% else %}
+                            <img src="/static/images/default-profile.png" alt="Default Profile"
+                                class="rounded-circle mb-3" width="80">
+                            {% endif %}
+                        </div>
+                        <div>
+                            <strong>{{ review.user.username }}</strong><br>
+        
+                        <!-- Debugging line: shows the actual numeric rating -->
+                        <code>Rating Value: {{ review.rating }}</code>
+        
+                        <div class="mt-1">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= review.rating %}
+                                    <i class="fa fa-star text-warning"></i>
+                                {% else %}
+                                    ☆
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+        
+                        <p class="mt-2">{{ review.comment }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+
+{% endblock %}

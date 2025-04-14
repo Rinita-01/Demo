@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="page-heading about-heading header-text">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="text-content">
+            <h4>Order</h4>
+            <h2>our Books</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+
+<div class="container text-center">
+  <h2 class="my-4">Order Placed Successfully! 🎉</h2>
+  <p>Thank you for your order. We will process it soon.</p>
+  <br>
+  {% if order %}
+      <a href="{% url 'download_order_pdf' order.id %}" class="btn btn-primary mb-2">Download Invoice PDF</a>
+  {% endif %}
+  <br>
+  <a href="{% url 'home' %}" class="btn btn-success">Return to Home</a>
+</div>
+
+{% endblock %}
