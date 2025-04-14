@@ -5,8 +5,6 @@ from .serializers import AuthorSerializer
 
 def show_author(request):
     authors = Author.objects.all()
-
-    
     return render(request, 'author/author.html', {'authors': authors}) 
 
 
