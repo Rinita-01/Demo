@@ -53,4 +53,4 @@ def decode_refresh_token(token):
         print(f'payload: {payload}')
         return payload['user_id']
     except:
-        raise exceptions.AuthenticationFailed('unauthenticated')
+        raise exceptions.AuthenticationFailed('unauthenticated')        

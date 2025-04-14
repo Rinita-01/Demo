@@ -85,3 +85,7 @@ Note 2: Coupons and Discounts for promotional offers.
                                 class="rounded-circle mb-3" width="80">
                             {% endif %}
                         </div>
+
+git add .
+git commit -m "message"
+git push origin main "origin name"
