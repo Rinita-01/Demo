@@ -38,7 +38,6 @@ def payment(request):
     else:
         return render(request, "payments/payment.html", {"amount": "0.00"})
 
-
 @custom_login_required
 def order_form(request, book_id, category_id):
     book = get_object_or_404(Book, id=book_id, category_id=category_id)
@@ -60,7 +59,11 @@ def order_form(request, book_id, category_id):
 
             return JsonResponse({
                 "status": "success",
-                "total_price": total_price
+                "message": "Stock updated successfully!",
+                "total_price": total_price,
+                "book_id": book.id,
+                "category_id": category_id,
+                "quantity": quantity
             })
 
         except Exception as e:

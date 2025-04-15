@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    // AJAX for Registration
     $("#register-btn").click(function (event) {
         event.preventDefault(); // Prevent default button behavior
         
@@ -93,6 +94,7 @@ $(document).ready(function () {
         });
     });
 
+    // AJAX for Login
     $("#login-btn").click(function (event) {
         event.preventDefault(); // Prevent default form submission
     
@@ -240,6 +242,9 @@ $(document).ready(function () {
         event.preventDefault();
     
         const amount = parseFloat($('#amount').val());
+        const book_id = $("input[name='book_id']").val();
+        const category_id = $("input[name='category_id']").val();
+        const quantity = $("input[name='quantity']").val();
     
         if (isNaN(amount) || amount <= 0) {
             alert('Please enter a valid amount.');
@@ -258,6 +263,9 @@ $(document).ready(function () {
             type: 'POST',
             data: {
                 amount: amountInPaise.toString(),  // Send as string to avoid decimal issues
+                book_id: book_id,
+                category_id: category_id,
+                quantity: quantity,
                 csrfmiddlewaretoken: csrfToken
             },
             success: function (data) {
@@ -282,12 +290,15 @@ $(document).ready(function () {
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
                                 razorpay_signature: response.razorpay_signature,
+                                book_id: book_id,
+                                category_id: category_id,
+                                quantity: quantity,
+                                amount: amount,
                                 csrfmiddlewaretoken: csrfToken
                             },
                             success: function (verificationResponse) {
                                 if (verificationResponse.success) {
                                     alert("Payment verified successfully!");
-                                    window.location.href = '/payments/order_success/' + data.order_id_db + '/';
                                 } else {
                                     alert("Payment verification failed: " + verificationResponse.error);
                                 }
@@ -308,8 +319,9 @@ $(document).ready(function () {
                 alert('Error creating order.');
             }
         });
-    }); 
-    
+    });
+
+    // Proceed to payment button click event
     $("#proceed-to-pay-btn").click(function (event) {
         event.preventDefault();
 

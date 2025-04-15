@@ -72,8 +72,8 @@
 									<p>{{ book.description|truncatewords:15 }}</p>
 									<ul class="stars">
 										{% for i in "12345" %}
-											{% if forloop.counter <= book.average_rating|default:0 %}
-											★
+										{% if forloop.counter <= book.average_rating|default:0 %}
+										<i class="fa fa-star text-warning"></i>
 											{% else %}
 											☆
 											{% endif %}

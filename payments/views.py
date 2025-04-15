@@ -19,12 +19,10 @@ def payment(request):
     amount = request.POST.get("amount")
     return render(request, "payments/payment.html", {"amount": amount})
 
-
 @custom_login_required
 def order_success(request , order_id):
     order = get_object_or_404(Order, id=order_id )
     return render(request, 'orders/order_success.html', {'order': order})
-
 
 def create_order(request):
     if request.method == 'POST':
@@ -78,7 +76,6 @@ def create_order(request):
             return JsonResponse({"error": str(e)})
     return JsonResponse({"error": "Invalid request"})
 
-
 def verify_payment(request):
     if request.method == "POST":
         try:
@@ -87,6 +84,19 @@ def verify_payment(request):
             razorpay_order_id = data.get("razorpay_order_id")
             razorpay_payment_id = data.get("razorpay_payment_id")
             razorpay_signature = data.get("razorpay_signature")
+
+            book_id = request.POST.get("book_id")
+            category_id = request.POST.get("category_id")
+            quantity = int(request.POST.get("quantity", 1))
+
+            # Reduce stock
+            book = get_object_or_404(Book, id=book_id, category_id=category_id)
+            book.stock -= quantity
+            book.save()
+
+            print("Payment-Book ID: ", book_id)
+            print("Payment-Category ID: ", category_id)
+            print("Payment-Quantity: ", quantity)
 
             if not (razorpay_order_id and razorpay_payment_id and razorpay_signature):
                 return JsonResponse({"error": "Missing required payment details."})
