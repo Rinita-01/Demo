@@ -137,28 +137,28 @@ $(document).ready(function () {
     
     // AJAX for Add to Cart
     $("#add-to-cart-btn").click(function (event) {
-        event.preventDefault(); // Prevent default form submission
-
+        event.preventDefault();
+    
         var book_id = $("input[name='prod_id']").val();
-        var csrf_token = $("input[name='csrfmiddlewaretoken']").val(); // Get CSRF token
-
+        var csrf_token = $("input[name='csrfmiddlewaretoken']").val();
+    
         $.ajax({
             url: "/cart/add_to_cart/",
             type: "POST",
             data: {
                 prod_id: book_id,
-                csrfmiddlewaretoken: csrf_token // Include CSRF token
+                csrfmiddlewaretoken: csrf_token
             },
             success: function (response) {
-                alert(response.message); // Show success message
-                $("#cart-count").text(response.total_item); // Update cart count in navbar
+                alert(response.message);
+                $("#cart-count").text(response.total_item);
             },
             error: function (xhr) {
-                alert("Error: " + xhr.responseJSON.message);
+                alert("Error: " + (xhr.responseJSON?.message || "Unexpected error"));
             }
         });
     });
-
+    
     function updateSummary(response) {
         $("#amount").text(response.amount.toFixed(2));  // Update subtotal
         $("#totalamount").text(response.total_amount.toFixed(2));  // Update total
@@ -299,6 +299,7 @@ $(document).ready(function () {
                             success: function (verificationResponse) {
                                 if (verificationResponse.success) {
                                     alert("Payment verified successfully!");
+                                    window.location.href = `/payments/order_success/${verificationResponse.order_id}/`;
                                 } else {
                                     alert("Payment verification failed: " + verificationResponse.error);
                                 }
@@ -310,7 +311,6 @@ $(document).ready(function () {
                         });
                     }
                 };
-    
                 const rzp = new Razorpay(options);
                 rzp.open();
             },
@@ -321,41 +321,76 @@ $(document).ready(function () {
         });
     });
 
-    // Proceed to payment button click event
     $("#proceed-to-pay-btn").click(function (event) {
         event.preventDefault();
-
+    
+        const quantity = $("#quantity").text();  // or `.val()` if it's an input
+        const bookId = $("input[name='book_id']").val();
+        const categoryId = $("input[name='category_id']").val();
         const csrfToken = $("#csrf-token").val();
-        const amount = $("#amount-input").val();
-
-        if (!amount || parseFloat(amount) <= 0) {
-            alert("Invalid amount.");
+        const price = parseFloat($("#amount").text());  // Or any total price shown
+        const shipping = 70.00;
+        const total = (price + shipping).toFixed(2);
+    
+        if (!bookId || !categoryId || !quantity || isNaN(total)) {
+            alert("Missing data or invalid quantity.");
             return;
         }
-
-        // Create a hidden form and submit it with POST
-        const form = $('<form>', {
-            method: 'POST',
-            action: '/payments/payment/'  // Adjust this if your URL name is different
+    
+        $.ajax({
+            type: "POST",
+            url: `/order/order_form/${bookId}/${categoryId}/`,
+            data: {
+                quantity: quantity,
+                total_price: total,
+                csrfmiddlewaretoken: csrfToken
+            },
+            success: function (response) {
+                if (response.status === "success") {
+                    // Dynamic POST form for secure payment redirection
+                    const form = $('<form>', {
+                        method: 'POST',
+                        action: '/cart/payment/'
+                    });
+    
+                    form.append($('<input>', {
+                        type: 'hidden',
+                        name: 'csrfmiddlewaretoken',
+                        value: csrfToken
+                    }));
+                    form.append($('<input>', {
+                        type: 'hidden',
+                        name: 'amount',
+                        value: response.total_price
+                    }));
+                    form.append($('<input>', {
+                        type: 'hidden',
+                        name: 'book_id',
+                        value: response.book_id
+                    }));
+                    form.append($('<input>', {
+                        type: 'hidden',
+                        name: 'category_id',
+                        value: response.category_id
+                    }));
+                    form.append($('<input>', {
+                        type: 'hidden',
+                        name: 'quantity',
+                        value: response.quantity
+                    }));
+    
+                    $('body').append(form);
+                    form.submit();
+                } else {
+                    alert(response.message || "Something went wrong.");
+                }
+            },
+            error: function (xhr) {
+                alert("Error: " + (xhr.responseJSON?.message || "Unexpected error"));
+            }
         });
-
-        // CSRF token
-        form.append($('<input>', {
-            type: 'hidden',
-            name: 'csrfmiddlewaretoken',
-            value: csrfToken
-        }));
-
-        // Amount
-        form.append($('<input>', {
-            type: 'hidden',
-            name: 'amount',
-            value: amount
-        }));
-
-        $('body').append(form);
-        form.submit();
     });
+    
 });
 
 $(document).ready(function () {

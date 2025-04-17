@@ -15,74 +15,87 @@ from users.decoraters import custom_login_required
 logger = logging.getLogger(__name__)
 
 def payment(request):
-    amount = request.POST.get('amount')
-    return render(request, 'payments/payment.html', {'amount': amount})
+    if request.method == "POST":
+        amount = request.POST.get("amount", "0.00")
+        book_id = request.POST.get("book_id")
+        category_id = request.POST.get("category_id")
+        
+        try:
+            quantity = int(request.POST.get("quantity") or 1)
+        except ValueError:
+            quantity = 1
 
+        return render(request, "payments/payment.html", {
+            "amount": amount,
+            "book_id": book_id,
+            "category_id": category_id,
+            "quantity": quantity
+        })
+    else:
+        return redirect('show_cart')  # safer fallback than rendering
+
+# @require_POST
 @custom_login_required
 def add_to_cart(request):
-    if request.method == "POST":
-        try:
-            book_id = request.POST.get('prod_id')
-            logger.info(f"Received book_id: {book_id}")
+    try:
+        book_id = request.POST.get('prod_id')
+        if not book_id:
+            return JsonResponse({"status": "error", "message": "Book ID missing!"}, status=400)
 
-            if not book_id:
-                return JsonResponse({"status": "error", "message": "Book ID missing!"}, status=400)
+        book = get_object_or_404(Book, id=book_id)
 
-            book = get_object_or_404(Book, id=book_id)
+        # Ensure stock is available
+        if book.stock <= 0:
+            return JsonResponse({"status": "error", "message": "This book is out of stock!"}, status=400)
 
-            # Ensure stock is available
-            if book.stock <= 0:
-                return JsonResponse({"status": "error", "message": "This book is out of stock!"}, status=400)
+        # Add or update cart item only if active
+        cart_item, created = Cart.objects.get_or_create(
+            user=request.user,
+            book=book,
+            is_active=True
+        )
 
-            # Add or update cart item
-            cart_item, created = Cart.objects.get_or_create(user=request.user, book=book) 
-            print(f"Cart item created: {cart_item}, Created: {created}")
-            print(f"Initial Quantity: {cart_item.quantity}")
-            if not created:
-                cart_item.quantity += 1
-                cart_item.save()
+        if not created:
+            cart_item.quantity += 1
+            cart_item.save()
 
-                # cart_item = Cart.objects.filter(user=request.user, book=book_id).first()
-                # if cart_item:
-                #     print(f"Quantity: {cart_item.quantity}")
-                # else:
-                #     print("Book not in cart for this user.")
-                # print(f'No. of items in cart: {Cart.objects.filter(user=request.user).count()}')
-                
-            cart_items = Cart.objects.filter(user=request.user)
-            total_items = cart_items.count()
-            print(f"No. of cart items: {total_items}")
-            return JsonResponse({"status": "success", "message": f"{book.title} added to cart!", "total_item": total_items})
-        except Exception as e:
-            logger.error(f"Error in add_to_cart: {e}")
-            return JsonResponse({"status": "error", "message": "Something went wrong!"}, status=500)
+        total_items = Cart.objects.filter(user=request.user, is_active=True).count()
 
-    return JsonResponse({"status": "error", "message": "Invalid request!"}, status=400)
+        return JsonResponse({
+            "status": "success",
+            "message": f"{book.title} added to cart!",
+            "total_item": total_items
+        })
+
+    except Exception as e:
+        logger.error(f"Error in add_to_cart: {e}")
+        return JsonResponse({"status": "error", "message": "Something went wrong!"}, status=500)
+
 
 @custom_login_required
 def show_cart(request):
-    cart_items = Cart.objects.filter(user=request.user)
+    cart_items = Cart.objects.filter(user=request.user, is_active=True)
     total_item_count = cart_items.count()
 
     if cart_items.exists():
-        shipping_amount = Decimal("70.00")  # Fixed shipping cost as Decimal
+        shipping_amount = Decimal("70.00")
 
-        # Calculate total amount using F expressions for better performance
         amount = cart_items.aggregate(
             total=Sum(F('quantity') * F('book__price'), output_field=DecimalField())
         )['total'] or Decimal("0.00")
 
-        total_amount = amount + shipping_amount  # Ensure both are Decimal
+        total_amount = amount + shipping_amount
 
         context = {
             'carts': cart_items,
-            'amount': amount.quantize(Decimal("0.00")),  # Format to 2 decimal places
+            'amount': amount.quantize(Decimal("0.00")),
             'total_amount': total_amount.quantize(Decimal("0.00")),
             'total_item': total_item_count
         }
         return render(request, 'cart/add_to_cart.html', context)
 
     return render(request, 'cart/empty_cart.html', {'total_item': total_item_count})
+
 
 @custom_login_required
 def update_cart(request):

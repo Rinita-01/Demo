@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 import razorpay
 import time
 import requests.exceptions
@@ -8,6 +8,7 @@ from buybook import settings
 from orders.models import Order
 from .models import Payment
 from books.models import Book
+from cart.models import Cart
 from orderitem.models import OrderItem
 from users.decoraters import custom_login_required
 from django.db.models import F
@@ -24,6 +25,7 @@ def order_success(request , order_id):
     order = get_object_or_404(Order, id=order_id )
     return render(request, 'orders/order_success.html', {'order': order})
 
+@custom_login_required
 def create_order(request):
     if request.method == 'POST':
         try:
@@ -76,6 +78,7 @@ def create_order(request):
             return JsonResponse({"error": str(e)})
     return JsonResponse({"error": "Invalid request"})
 
+@custom_login_required
 def verify_payment(request):
     if request.method == "POST":
         try:
@@ -119,6 +122,15 @@ def verify_payment(request):
                 order = Order.objects.get(razorpay_order_id=razorpay_order_id)
                 order.status = 'Completed'
                 order.save()
+
+                if request.user.is_authenticated:
+                    Cart.objects.filter(user=request.user, book_id=book_id, is_active=True).delete()
+
+                return JsonResponse({
+                    "success": True,
+                    "message": "Payment verified and order completed.",
+                    "order_id": order.id  # Send this for redirection
+                })
 
             except razorpay.errors.SignatureVerificationError:
                 print("Signature verification failed!")
