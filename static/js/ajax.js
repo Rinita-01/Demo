@@ -237,40 +237,42 @@ $(document).ready(function () {
         });
     });
 
-    // Checkout button click event
+    // AJAX for Payment
     $('#pay-button').click(function (event) {
         event.preventDefault();
     
-        const amount = parseFloat($('#amount').val());
-        const book_id = $("input[name='book_id']").val();
-        const category_id = $("input[name='category_id']").val();
-        const quantity = $("input[name='quantity']").val();
+        const amount = parseFloat($('#amount').val().trim());
+        const book_id = $("input[name='book_id']").val()?.trim();
+        const category_id = $("input[name='category_id']").val()?.trim();
+        const quantity = parseInt($("input[name='quantity']").val()?.trim()) || 1;
     
         if (isNaN(amount) || amount <= 0) {
             alert('Please enter a valid amount.');
             return;
         }
     
-        const amountInPaise = Math.round(amount * 100); // Convert to paise (integer)
+        const amountInPaise = Math.round(amount * 100);
         const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
     
-        console.log("Amount in paise: ", amountInPaise);
-        console.log("CSRF Token: ", csrfToken);
+        // Prepare data for order creation
+        let requestData = {
+            amount: amountInPaise.toString(),
+            csrfmiddlewaretoken: csrfToken
+        };
     
-        // Create Razorpay order via AJAX
+        // Include book details if it's a direct "Buy Now" purchase
+        if (book_id && category_id) {
+            requestData.book_id = book_id;
+            requestData.category_id = category_id;
+            requestData.quantity = quantity;
+        }
+    
+        // Create Razorpay order
         $.ajax({
             url: '/payments/create_order/',
             type: 'POST',
-            data: {
-                amount: amountInPaise.toString(),  // Send as string to avoid decimal issues
-                book_id: book_id,
-                category_id: category_id,
-                quantity: quantity,
-                csrfmiddlewaretoken: csrfToken
-            },
+            data: requestData,
             success: function (data) {
-                console.log("API Response: ", data);
-    
                 const options = {
                     key: data.key,
                     amount: data.amount,
@@ -280,22 +282,27 @@ $(document).ready(function () {
                     description: 'Payment for your order',
                     handler: function (response) {
                         alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
-                        console.log("Payment Response: ", response);
     
-                        // Verify the payment on server
+                        // Prepare data for server-side payment verification
+                        let verifyData = {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            csrfmiddlewaretoken: csrfToken
+                        };
+    
+                        if (book_id && category_id) {
+                            verifyData.book_id = book_id;
+                            verifyData.category_id = category_id;
+                            verifyData.quantity = quantity;
+                            verifyData.amount = amount;
+                        }
+    
+                        // Verify the payment
                         $.ajax({
                             url: '/payments/verify_payment/',
                             type: 'POST',
-                            data: {
-                                razorpay_order_id: response.razorpay_order_id,
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_signature: response.razorpay_signature,
-                                book_id: book_id,
-                                category_id: category_id,
-                                quantity: quantity,
-                                amount: amount,
-                                csrfmiddlewaretoken: csrfToken
-                            },
+                            data: verifyData,
                             success: function (verificationResponse) {
                                 if (verificationResponse.success) {
                                     alert("Payment verified successfully!");
@@ -305,12 +312,13 @@ $(document).ready(function () {
                                 }
                             },
                             error: function (error) {
+                                console.error("Verification error:", error);
                                 alert("Error verifying payment.");
-                                console.error(error);
                             }
                         });
                     }
                 };
+    
                 const rzp = new Razorpay(options);
                 rzp.open();
             },
@@ -320,26 +328,22 @@ $(document).ready(function () {
             }
         });
     });
-
+    
+    
     $("#proceed-to-pay-btn").click(function (event) {
         event.preventDefault();
-    
+        console.log("Proceed to payment button clicked");
+
         const quantity = $("#quantity").text();  // or `.val()` if it's an input
-        const bookId = $("input[name='book_id']").val();
-        const categoryId = $("input[name='category_id']").val();
         const csrfToken = $("#csrf-token").val();
         const price = parseFloat($("#amount").text());  // Or any total price shown
         const shipping = 70.00;
         const total = (price + shipping).toFixed(2);
-    
-        if (!bookId || !categoryId || !quantity || isNaN(total)) {
-            alert("Missing data or invalid quantity.");
-            return;
-        }
+        console.log("Total amount: ", total);
     
         $.ajax({
             type: "POST",
-            url: `/order/order_form/${bookId}/${categoryId}/`,
+            url: `/order/order_form_cart/`,
             data: {
                 quantity: quantity,
                 total_price: total,
@@ -363,22 +367,7 @@ $(document).ready(function () {
                         name: 'amount',
                         value: response.total_price
                     }));
-                    form.append($('<input>', {
-                        type: 'hidden',
-                        name: 'book_id',
-                        value: response.book_id
-                    }));
-                    form.append($('<input>', {
-                        type: 'hidden',
-                        name: 'category_id',
-                        value: response.category_id
-                    }));
-                    form.append($('<input>', {
-                        type: 'hidden',
-                        name: 'quantity',
-                        value: response.quantity
-                    }));
-    
+
                     $('body').append(form);
                     form.submit();
                 } else {
@@ -390,7 +379,39 @@ $(document).ready(function () {
             }
         });
     });
+
+    // AJAX for Cart Item Selection
+    $('input[name="selected_items"]').on('change', function() {
+        let cartId = $(this).val();
+        let isChecked = $(this).is(':checked');
+        let csrfToken = $('#csrf-token').val();
     
+        $.ajax({
+            url: `/cart/toggle-cart-item/`,
+            method: "POST",
+            data: {
+                cart_id: cartId,
+                is_active: isChecked,
+                csrfmiddlewaretoken: csrfToken
+            },
+            success: function(response) {
+                console.log(response.message);
+                
+                // 🟢 After updating item status, fetch the new totals
+                $.ajax({
+                    url: "/cart/totals/",
+                    method: "GET",
+                    success: function(data) {
+                        $('#amount').text(data.amount);
+                        $('#totalamount').text(data.total_amount);
+                    }
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    });        
 });
 
 $(document).ready(function () {
@@ -426,7 +447,7 @@ $(document).ready(function () {
             return;
         }
     
-        const total = (price * quantity).toFixed(2);
+        const total = (price * quantity + 70).toFixed(2);
     
         $.ajax({
             type: "POST",
@@ -489,17 +510,17 @@ $(document).ready(function () {
 document.addEventListener("DOMContentLoaded", function () {
     const stars = document.querySelectorAll("#star-rating .star");
     const ratingInput = document.getElementById("rating");
+    const bookId = $('#submit-button').data('book-id');
 
+    // ⭐ Star click logic
     stars.forEach((star, index) => {
         star.addEventListener('click', () => {
             const rating = index + 1;
             ratingInput.value = rating;
 
-            // Reset all
             stars.forEach(s => s.classList.remove('fa-star', 'text-warning'));
             stars.forEach(s => s.classList.add('fa-star-o'));
 
-            // Highlight selected
             for (let i = 0; i < rating; i++) {
                 stars[i].classList.remove('fa-star-o');
                 stars[i].classList.add('fa-star', 'text-warning');
@@ -507,20 +528,38 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // AJAX submit
+    // ✅ Update sentiment counts
+    function updateSentimentCounts(bookId) {
+        $.ajax({
+            url: `/reviews/sentiment_counts/${bookId}/`,
+            method: 'GET',
+            success: function (data) {
+                $('#count-positive').text(data.positive || 0);
+                $('#count-neutral').text(data.neutral || 0);
+                $('#count-negative').text(data.negative || 0);
+
+            },
+            error: function () {
+                console.error("Failed to fetch sentiment counts.");
+            }
+        });
+    }
+
+    updateSentimentCounts(bookId);  // Initial load
+
+    // 📝 AJAX Review Submit
     $('#submit-button').click(function (event) {
         event.preventDefault();
-    
+
         const rating = $('#rating').val();
-        const comment = $('#comment').val();
-        const bookId = $(this).data('book-id');
+        const comment = $('#comment').val().trim();
         const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
-    
+
         if (!rating || !comment) {
             $('#message').html(`<div class="alert alert-danger">Please fill all fields.</div>`);
             return;
         }
-    
+
         $.ajax({
             url: `/reviews/submit/${bookId}/`,
             method: "POST",
@@ -531,23 +570,27 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             success: function (response) {
                 $('#message').html(`<div class="alert alert-success">${response.message}</div>`);
-    
                 $('#review-form')[0].reset();
                 $('#rating').val('');
                 $(".star").removeClass("fa-star text-warning").addClass("fa-star-o");
-    
+
                 const stars = '★'.repeat(response.review.rating) + '☆'.repeat(5 - response.review.rating);
-    
+
                 const newReviewHtml = `
                     <div class="card mt-3">
                         <div class="card-body">
                             <strong>${response.review.username}</strong><br>
                             <span class="text-warning">${stars}</span>
                             <p class="mt-2">${response.review.comment}</p>
+                            <span class="badge bg-info">Sentiment: ${response.review.prediction}</span>
                         </div>
                     </div>
                 `;
                 $('#review-section').prepend(newReviewHtml);
+
+                // Refresh sentiment counts after successful submit
+                $('#sentiment-summary-block').remove();  // Remove previous summary if exists
+                updateSentimentCounts(bookId);
             },
             error: function (xhr) {
                 let errorMsg = "Something went wrong. Please try again.";

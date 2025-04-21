@@ -1,5 +1,4 @@
 from django.db import models
-
 from books.models import Book
 from users.models import User
 
@@ -8,6 +7,7 @@ class Review(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     rating = models.PositiveSmallIntegerField()
     comment = models.TextField()
+    prediction = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

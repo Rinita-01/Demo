@@ -201,3 +201,5 @@ JAZZMIN_UI_TWEAKS = {
     }
 }
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODELS = os.path.join(BASE_DIR, 'reviews', 'models')

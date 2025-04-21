@@ -12,6 +12,7 @@ from cart.models import Cart
 from orderitem.models import OrderItem
 from users.decoraters import custom_login_required
 from django.db.models import F
+from django.db import transaction
 
 # Razorpay client initialization
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -24,6 +25,7 @@ def payment(request):
 def order_success(request , order_id):
     order = get_object_or_404(Order, id=order_id )
     return render(request, 'orders/order_success.html', {'order': order})
+
 
 @custom_login_required
 def create_order(request):
@@ -78,65 +80,97 @@ def create_order(request):
             return JsonResponse({"error": str(e)})
     return JsonResponse({"error": "Invalid request"})
 
+
 @custom_login_required
 def verify_payment(request):
     if request.method == "POST":
         try:
             data = request.POST
             print("Received Data: ", data)
+
             razorpay_order_id = data.get("razorpay_order_id")
             razorpay_payment_id = data.get("razorpay_payment_id")
             razorpay_signature = data.get("razorpay_signature")
 
-            book_id = request.POST.get("book_id")
-            category_id = request.POST.get("category_id")
-            quantity = int(request.POST.get("quantity", 1))
-
-            # Reduce stock
-            book = get_object_or_404(Book, id=book_id, category_id=category_id)
-            book.stock -= quantity
-            book.save()
-
-            print("Payment-Book ID: ", book_id)
-            print("Payment-Category ID: ", category_id)
-            print("Payment-Quantity: ", quantity)
-
             if not (razorpay_order_id and razorpay_payment_id and razorpay_signature):
                 return JsonResponse({"error": "Missing required payment details."})
 
+            # 1. Verify the Razorpay signature
             params_dict = {
                 "razorpay_order_id": razorpay_order_id,
                 "razorpay_payment_id": razorpay_payment_id,
                 "razorpay_signature": razorpay_signature,
             }
 
-            try:
-                client.utility.verify_payment_signature(params_dict)
-                print("Payment verification successful!")
+            client.utility.verify_payment_signature(params_dict)
+            print("✅ Payment verification successful!")
 
-                payment = Payment.objects.get(transaction_id=razorpay_order_id)
-                payment.status = 'Completed'
-                payment.is_paid = True
-                payment.save()
+            # 2. Mark payment and order as complete
+            payment = Payment.objects.get(transaction_id=razorpay_order_id)
+            payment.status = 'Completed'
+            payment.is_paid = True
+            payment.save()
 
-                order = Order.objects.get(razorpay_order_id=razorpay_order_id)
-                order.status = 'Completed'
-                order.save()
+            order = Order.objects.get(razorpay_order_id=razorpay_order_id)
+            order.status = 'Completed'
+            order.save()
 
+            # Inside the try block and within transaction.atomic():
+
+            with transaction.atomic():
                 if request.user.is_authenticated:
-                    Cart.objects.filter(user=request.user, book_id=book_id, is_active=True).delete()
+                    # 1. Cart-based purchase
+                    active_cart_items = Cart.objects.filter(user=request.user, is_active=True)
 
-                return JsonResponse({
-                    "success": True,
-                    "message": "Payment verified and order completed.",
-                    "order_id": order.id  # Send this for redirection
-                })
+                    if active_cart_items.exists():
+                        for cart_item in active_cart_items:
+                            book = cart_item.book
+                            quantity = cart_item.quantity
 
-            except razorpay.errors.SignatureVerificationError:
-                print("Signature verification failed!")
-                return JsonResponse({"error": "Invalid payment signature."})
+                            if book.stock >= quantity:
+                                book.stock -= quantity
+                                book.save()
+                            else:
+                                return JsonResponse({
+                                    "error": f"Insufficient stock for book: {book.title}"
+                                })
+
+                        active_cart_items.delete()
+                        print("🧹 Purchased items deleted from cart!")
+
+                    # 2. Direct purchase (book_id sent via POST)
+                    else:
+                        book_id = request.POST.get("book_id")
+                        category_id = request.POST.get("category_id")
+                        quantity = int(request.POST.get("quantity", 1))
+
+                        if book_id and category_id:
+                            book = get_object_or_404(Book, id=book_id, category_id=category_id)
+
+                            if book.stock >= quantity:
+                                book.stock -= quantity
+                                book.save()
+                                print(f"📦 Direct purchase: stock updated for {book.title}")
+                            else:
+                                return JsonResponse({
+                                    "error": f"Insufficient stock for book: {book.title}"
+                                })
+                        else:
+                            return JsonResponse({"error": "Missing book info for direct purchase."})
+
+
+            return JsonResponse({
+                "success": True,
+                "message": "Payment verified and all items processed.",
+                "order_id": order.id
+            })
+
+        except razorpay.errors.SignatureVerificationError:
+            print("❌ Signature verification failed!")
+            return JsonResponse({"error": "Invalid payment signature."})
 
         except Exception as e:
-            print("Error:", str(e))
+            print("⚠️ Error:", str(e))
             return JsonResponse({"error": str(e)})
+
     return JsonResponse({"error": "Invalid request method"})

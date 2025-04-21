@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from orderitem.models import OrderItem
-
+from cart.models import Cart
 from django.views.decorators.csrf import csrf_protect
 
 
@@ -38,6 +38,7 @@ def payment(request):
     else:
         return render(request, "payments/payment.html", {"amount": "0.00"})
 
+# This FBV will be called when the user clicks on the "Place Order" button for a book
 @custom_login_required
 def order_form(request, book_id, category_id):
     book = get_object_or_404(Book, id=book_id, category_id=category_id)
@@ -74,6 +75,34 @@ def order_form(request, book_id, category_id):
         'quantity_range': quantity_range
     }
     return render(request, 'orders/add_order.html', context)
+
+# order from  cart
+@custom_login_required
+def order_form_cart(request):
+    cart_items = Cart.objects.filter(user=request.user, is_active=True)
+    total_item_count = cart_items.count()
+    total_price = sum(item.book.price * item.quantity for item in cart_items)
+    total_price += 70 
+
+    print("Total Price: ", total_price)
+    print("Total Items in Cart: ", total_item_count)
+
+    if request.method == "POST":
+        try:
+            quantity = int(request.POST.get("quantity", 1))
+            total_price = request.POST.get("total_price")
+
+            return JsonResponse({
+                "status": "success",
+                "message": "Stock updated successfully!",
+                "total_price": total_price,
+                "quantity": quantity
+            })
+
+        except Exception as e:
+            return JsonResponse({"message": f"Error processing request: {str(e)}"}, status=400)
+
+    return render(request, 'orders/add_order.html')
 
 @custom_login_required
 def order_list(request):

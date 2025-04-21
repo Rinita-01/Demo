@@ -74,18 +74,6 @@ Additional Features:
 Note 1: Recommendation System using user preferences or book categories.
 Note 2: Coupons and Discounts for promotional offers.
 
-
-
-<div>
-                            {% if review.user.profile_picture %}
-                            <img src="{{ review.user.profile_picture.url }}" alt="Profile Picture"
-                                class="rounded-circle mb-3" width="80">
-                            {% else %}
-                            <img src="/static/images/default-profile.png" alt="Default Profile"
-                                class="rounded-circle mb-3" width="80">
-                            {% endif %}
-                        </div>
-
 git add .
 git commit -m "message"
 git push origin main 

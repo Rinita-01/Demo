@@ -33,26 +33,28 @@
                 <div class="card-body">
                     <h4 class="mb-3">Cart Items</h4>
                     {% for cart in carts %}
-                    <hr>
-                    <div class="row align-items-center">
-                        <div class="col-md-3 text-center">
-                            <img src="{{ cart.book.cover_image.url }}" alt="{{ cart.book.title }}"
-                                class="img-fluid img-thumbnail" height="100" width="100">
-                        </div>
-                        <div class="col-md-6">
-                            <h5>{{ cart.book.title }}</h5>
-                            <p><strong>Price:</strong> Rs. {{ cart.book.price }}</p>
-                            <div class="d-flex align-items-center">
-                                <label for="quantity">Quantity:</label>
-                                <a class="btn btn-light mx-2 minus-cart" pid="{{ cart.book.id }}"><i>-</i></a>
-                                <span id="quantity" name="quantity">{{ cart.quantity }}</span>
-                                <a class="btn btn-light mx-2 plus-cart" pid="{{ cart.book.id }}"><i>+</i></a>
+                        <hr>
+                        <div class="row align-items-center">
+                            <div class="col-md-1 text-center">
+                                <input type="checkbox" name="selected_items" value="{{ cart.id }}" {% if cart.is_active %}checked{% endif %}>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <img src="{{ cart.book.cover_image.url }}" alt="{{ cart.book.title }}" class="img-fluid img-thumbnail" height="100" width="100">
+                            </div>
+                            <div class="col-md-6">
+                                <h5>{{ cart.book.title }}</h5>
+                                <p><strong>Price:</strong> Rs. {{ cart.book.price }}</p>
+                                <div class="d-flex align-items-center">
+                                    <label for="quantity">Quantity:</label>
+                                    <a class="btn btn-light mx-2 minus-cart" pid="{{ cart.book.id }}"><i>-</i></a>
+                                    <span id="quantity" name="quantity">{{ cart.quantity }}</span>
+                                    <a class="btn btn-light mx-2 plus-cart" pid="{{ cart.book.id }}"><i>+</i></a>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <a class="btn btn-sm btn-danger remove-cart" pid="{{ cart.book.id }}">Remove</a>
                             </div>
                         </div>
-                        <div class="col-md-3 text-end">
-                            <a class="btn btn-sm btn-danger remove-cart" pid="{{ cart.book.id }}">Remove</a>
-                        </div>
-                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -85,9 +87,17 @@
                         <input type="hidden" name="book_id" value="{{ carts.0.book.id }}">
                         <input type="hidden" name="category_id" value="{{ carts.0.book.category.id }}">
                         <input type="hidden" name="quantity" id="quantity" value="{{ carts.0.quantity }}">
+
+                        <!-- Loop through the cart items and create hidden inputs for each item -->
+                        <!-- {% for cart in carts %}
+                            <input type="hidden" name="book_id_{{ forloop.counter }}" value="{{ cart.book.id }}">
+                            <input type="hidden" name="category_id_{{ forloop.counter }}" value="{{ cart.book.category.id }}">
+                            <input type="hidden" name="quantity_{{ forloop.counter }}" value="{{ cart.quantity }}">
+                        {% endfor %}
+                        <input type="hidden" name="total_items" value="{{ carts|length }}"> -->
                     {% endif %}
         
-                    <button type="submit" class="btn btn-dark mt-3 w-100" id="proceed-to-pay-btn">Proceed to Pay</button>
+                    <button type="submit" class="btn btn-dark mt-3 w-100" id="proceed-to-pay-btn">Proceed to Pay Now</button>
                 </div>
             </div>
         </div>        

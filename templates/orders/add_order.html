@@ -82,17 +82,13 @@
                         <div class="total">
                             <h4>Price: ₹<span id="book-price">{{ book.price }}</span></h4>
                             <h4>Total: ₹<span id="total-price">0.00</span></h4>
-                            <button type="button" class="btn btn-dark mt-3 w-100" id="go-to-payment-btn">
-                                Place Order
-                            </button>
+                            <button type="button" class="btn btn-dark mt-3 w-100" id="go-to-payment-btn">Place Order</button>
                         </div>
                     </form>
                     <form id="cartForm">
                         {% csrf_token %}
                         <input type="hidden" name="prod_id" value="{{ book.id }}">
-                        <button type="button" class="btn btn-primary shadow px-5 py-2 mt-3 w-100" id="add-to-cart-btn">
-                            Add to Cart
-                        </button>
+                        <button type="button" class="btn btn-primary shadow px-5 py-2 mt-3 w-100" id="add-to-cart-btn">Add to Cart</button>
                     </form>
                     <br>
 
@@ -165,7 +161,7 @@
                     </div>
                 </div>
             {% endfor %}
-        </div>
+        </div>        
     </div>
 </section>
 
