@@ -88,13 +88,6 @@
                         <input type="hidden" name="category_id" value="{{ carts.0.book.category.id }}">
                         <input type="hidden" name="quantity" id="quantity" value="{{ carts.0.quantity }}">
 
-                        <!-- Loop through the cart items and create hidden inputs for each item -->
-                        <!-- {% for cart in carts %}
-                            <input type="hidden" name="book_id_{{ forloop.counter }}" value="{{ cart.book.id }}">
-                            <input type="hidden" name="category_id_{{ forloop.counter }}" value="{{ cart.book.category.id }}">
-                            <input type="hidden" name="quantity_{{ forloop.counter }}" value="{{ cart.quantity }}">
-                        {% endfor %}
-                        <input type="hidden" name="total_items" value="{{ carts|length }}"> -->
                     {% endif %}
         
                     <button type="submit" class="btn btn-dark mt-3 w-100" id="proceed-to-pay-btn">Proceed to Pay Now</button>

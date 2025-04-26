@@ -1,6 +1,5 @@
 from django.db import models
 from users.models import User
-from books.models import Book
 
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

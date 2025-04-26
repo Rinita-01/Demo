@@ -3,7 +3,6 @@ import razorpay
 import time
 import requests.exceptions
 from django.http import JsonResponse
-
 from buybook import settings
 from orders.models import Order
 from .models import Payment
@@ -13,6 +12,9 @@ from orderitem.models import OrderItem
 from users.decoraters import custom_login_required
 from django.db.models import F
 from django.db import transaction
+from django.core.mail import EmailMessage
+from django.conf import settings
+import os
 
 # Razorpay client initialization
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -21,11 +23,10 @@ def payment(request):
     amount = request.POST.get("amount")
     return render(request, "payments/payment.html", {"amount": amount})
 
-@custom_login_required
-def order_success(request , order_id):
-    order = get_object_or_404(Order, id=order_id )
+@custom_login_required 
+def order_success(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
     return render(request, 'orders/order_success.html', {'order': order})
-
 
 @custom_login_required
 def create_order(request):
@@ -80,7 +81,6 @@ def create_order(request):
             return JsonResponse({"error": str(e)})
     return JsonResponse({"error": "Invalid request"})
 
-
 @custom_login_required
 def verify_payment(request):
     if request.method == "POST":
@@ -95,17 +95,16 @@ def verify_payment(request):
             if not (razorpay_order_id and razorpay_payment_id and razorpay_signature):
                 return JsonResponse({"error": "Missing required payment details."})
 
-            # 1. Verify the Razorpay signature
+            # Verify signature
             params_dict = {
                 "razorpay_order_id": razorpay_order_id,
                 "razorpay_payment_id": razorpay_payment_id,
                 "razorpay_signature": razorpay_signature,
             }
-
             client.utility.verify_payment_signature(params_dict)
             print("✅ Payment verification successful!")
 
-            # 2. Mark payment and order as complete
+            # Update payment and order
             payment = Payment.objects.get(transaction_id=razorpay_order_id)
             payment.status = 'Completed'
             payment.is_paid = True
@@ -115,12 +114,12 @@ def verify_payment(request):
             order.status = 'Completed'
             order.save()
 
-            # Inside the try block and within transaction.atomic():
-
             with transaction.atomic():
-                if request.user.is_authenticated:
-                    # 1. Cart-based purchase
-                    active_cart_items = Cart.objects.filter(user=request.user, is_active=True)
+                user = request.user
+                purchased_books = []
+
+                if user.is_authenticated:
+                    active_cart_items = Cart.objects.filter(user=user, is_active=True)
 
                     if active_cart_items.exists():
                         for cart_item in active_cart_items:
@@ -130,6 +129,7 @@ def verify_payment(request):
                             if book.stock >= quantity:
                                 book.stock -= quantity
                                 book.save()
+                                purchased_books.append(book)
                             else:
                                 return JsonResponse({
                                     "error": f"Insufficient stock for book: {book.title}"
@@ -137,8 +137,6 @@ def verify_payment(request):
 
                         active_cart_items.delete()
                         print("🧹 Purchased items deleted from cart!")
-
-                    # 2. Direct purchase (book_id sent via POST)
                     else:
                         book_id = request.POST.get("book_id")
                         category_id = request.POST.get("category_id")
@@ -150,6 +148,7 @@ def verify_payment(request):
                             if book.stock >= quantity:
                                 book.stock -= quantity
                                 book.save()
+                                purchased_books.append(book)
                                 print(f"📦 Direct purchase: stock updated for {book.title}")
                             else:
                                 return JsonResponse({
@@ -158,6 +157,19 @@ def verify_payment(request):
                         else:
                             return JsonResponse({"error": "Missing book info for direct purchase."})
 
+                # ✅ Send email with PDF
+                email = user.email
+                subject = "Your Book Purchase Confirmation 📚"
+                message = "Thank you for your purchase. Please find your book(s) attached."
+                email_msg = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+
+                for book in purchased_books:
+                    if book.pdf_file:  # Assuming `pdf_file` is a FileField or similar
+                        pdf_path = book.pdf_file.path
+                        email_msg.attach_file(pdf_path)
+
+                email_msg.send()
+                print("📧 Email with book PDF(s) sent!")
 
             return JsonResponse({
                 "success": True,
@@ -174,3 +186,4 @@ def verify_payment(request):
             return JsonResponse({"error": str(e)})
 
     return JsonResponse({"error": "Invalid request method"})
+

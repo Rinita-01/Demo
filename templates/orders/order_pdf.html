@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Order Invoice</title>
@@ -55,7 +56,8 @@
             font-size: 13.5px;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 12px;
             text-align: center;
@@ -85,6 +87,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="invoice-container">
         <h2>Order Invoice</h2>
@@ -109,21 +112,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in items %}
+                    {% for book in books %}
                     <tr>
-                        <td>{{ item.book.title }}</td>
-                        <td>
-                            {% if item.book.cover_image %}
-                            <img src="{{ item.book.cover_image.url }}" alt="{{ item.book.title }}">
-                            {% else %}
-                            <img src="{% static 'images/default-book.jpg' %}" alt="No Image">
-                            {% endif %}
-                        </td>
-                        <td>{{ item.quantity }}</td>
-                        <td>₹{{ item.price_at_purchase|floatformat:"2" }}</td>
-                        <td>₹{{ item.total_price|floatformat:"2" }}</td>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.quantity }}</td>
+                        <td>₹{{ book.price_at_purchase }}</td>
+                        <td>₹{{ book.total_price }}</td>
                     </tr>
                     {% endfor %}
+
                 </tbody>
             </table>
         </div>
@@ -138,4 +135,5 @@
         </div>
     </div>
 </body>
+
 </html>

@@ -411,7 +411,8 @@ $(document).ready(function () {
                 console.error("Error:", error);
             }
         });
-    });        
+    });
+            
 });
 
 $(document).ready(function () {

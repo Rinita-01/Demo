@@ -34,7 +34,6 @@ def payment(request):
     else:
         return redirect('show_cart')  # safer fallback than rendering
 
-# @require_POST
 @custom_login_required
 def add_to_cart(request):
     try:
@@ -67,7 +66,6 @@ def add_to_cart(request):
     except Exception as e:
         logger.error(f"Error in add_to_cart: {e}")
         return JsonResponse({"status": "error", "message": "Something went wrong!"}, status=500)
-
 
 @custom_login_required
 def show_cart(request):

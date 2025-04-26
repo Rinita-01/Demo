@@ -9,13 +9,13 @@ from .serializers import BookSerializer
 from django.db.models import Avg
 
 def show_books(request):
-    books = Book.objects.all()
+    # books = Book.objects.all()
     books = Book.objects.all().annotate(average_rating=Avg('review__rating'))
     paginator = Paginator(books, 3)  
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    return render(request, "books/books.html", {"page_obj": page_obj,'books': books})
+    return render(request, "books/books.html", {"page_obj": page_obj})
 
 
 class BookListCreateView(generics.ListCreateAPIView):

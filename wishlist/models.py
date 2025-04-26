@@ -1,5 +1,4 @@
 from django.db import models
-
 from books.models import Book
 from users.models import User
 
