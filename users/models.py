@@ -18,6 +18,7 @@ class User(AbstractUser):
         max_length=10, choices=[('customer', 'Customer'), ('admin', 'Admin')],
         default='customer'  # Default to 'customer'
     )
+    # otp = models.CharField(max_length=6, blank=True, null=True)
 
     USERNAME_FIELD = 'email'  # Login with email instead of username
     REQUIRED_FIELDS = ['first_name', 'last_name']  # Removed 'username' since it's optional

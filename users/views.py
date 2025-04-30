@@ -333,3 +333,95 @@ class LogoutAPIView(APIView):
 #         'message': 'success'
 #     }
 #     return response
+
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import status
+from django.contrib.auth import authenticate, login
+from .models import User  # import your User model
+import logging
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth import login
+from .serializers import AdminLoginSerializer
+
+
+
+logger = logging.getLogger(__name__)
+
+# Admin Registration through Class Based View
+@method_decorator(csrf_exempt, name='dispatch')
+class AdminRegistrationAPIView(APIView):
+    parser_classes = (MultiPartParser, FormParser)  # Handles form-data + file uploads
+
+    def post(self, request, *args, **kwargs):
+        try:
+            email = request.data.get('email')
+            password = request.data.get('password')
+            first_name = request.data.get('first_name')
+            last_name = request.data.get('last_name')
+            username = request.data.get('username')
+            dob = request.data.get('dob')
+            gender = request.data.get('gender')
+            phone = request.data.get('phone')
+            address = request.data.get('address')
+            profile_picture = request.FILES.get('profile_picture')
+
+            logger.debug(f"Received Data: {email}, {username}, {first_name}, {last_name}")
+
+            # Validate required fields
+            if not email or not password or not username:
+                return Response({'success': False, 'error': 'Missing required fields (email, username, or password).'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create the admin user
+            user = User.objects.create_user(
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                username=username,
+                dob=dob,
+                gender=gender,
+                phone=phone,
+                address=address,
+                profile_picture=profile_picture
+            )
+            user.is_staff = True
+            user.is_superuser = True
+            user.user_type = 'admin'
+            user.save()
+
+            # Login the user immediately
+            authenticated_user = authenticate(request, email=email, password=password)
+            if authenticated_user:
+                login(request, authenticated_user)
+
+            return Response({
+                'success': True,
+                'message': 'Admin registration successful!',
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            logger.error(f"Error during admin registration: {str(e)}")
+            return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Admin Login through Class Based View
+class AdminLoginAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = AdminLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            login(request, user)
+
+            return Response({
+                'success': True,
+                'message': 'Admin login successful!',
+            }, status=status.HTTP_200_OK)
+        
+        return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

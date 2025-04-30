@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (RegisterAPIView, LoginAPIView, UserAPIView, RefreshAPIView, LogoutAPIView, 
-customer_registration, admin_registration, customer_login, myAccount, logout, activate, order_list)
+customer_registration, admin_registration, customer_login, myAccount, logout, activate, 
+order_list, AdminRegistrationAPIView, AdminLoginAPIView)
 
 urlpatterns = [
     path('register/', customer_registration, name='customer_registration'),
@@ -16,7 +17,7 @@ urlpatterns = [
     path('user/', UserAPIView.as_view()),
     path('refresh/', RefreshAPIView.as_view()),
     path('logout/', LogoutAPIView.as_view()),
+    path('api/admin-register/', AdminRegistrationAPIView.as_view(), name='api_admin_registration'),
+    path('api/admin-login/', AdminLoginAPIView.as_view(), name='api_admin_login')
 
-    # path('signup/', signup, name='signup'),
-    # path('logout/', api_logout, name='logout'),
 ]

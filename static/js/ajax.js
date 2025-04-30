@@ -49,6 +49,7 @@ $(document).ready(function () {
         });
     });
 
+
     $("#admin-Register-btn").click(function(event){
         event.preventDefault();
 
@@ -94,7 +95,7 @@ $(document).ready(function () {
         });
     });
 
-    // AJAX for Login
+    
     $("#login-btn").click(function (event) {
         event.preventDefault(); // Prevent default form submission
     
