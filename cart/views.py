@@ -14,6 +14,7 @@ from users.decoraters import custom_login_required
 
 logger = logging.getLogger(__name__)
 
+@custom_login_required
 def payment(request):
     if request.method == "POST":
         amount = request.POST.get("amount", "0.00")

@@ -32,8 +32,69 @@ https://templatemo.com/tm-546-sixteen-clothing
     <script src="{% static 'js/validation.js' %}"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+    <style>
+        /* Password field wrapper */
+        .pass-field {
+            position: relative;
+            margin-bottom: 20px;
+        }
 
-    
+        /* Eye icon inside the password field */
+        .pass-field i {
+            position: absolute;
+            top: 70%;
+            right: 25px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+            font-size: 20px;
+            transition: color 0.3s ease-in-out;
+        }
+
+        /* Password input field */
+        .pass-field input {
+            padding-right: 40px; /* Adjust space for the eye icon */
+        }
+        .content{
+            margin-top: 0px;
+        }
+        .content p {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+            padding-left: 25px;
+        }
+
+        /* List for password requirements */
+        .requirement-list {
+            list-style: none;
+            padding-left: 25px;
+        }
+
+        .requirement-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .requirement-list li i {
+            margin-right: 10px;
+            color: #ccc;
+        }
+
+        /* Highlighted requirements when valid */
+        .requirement-list li.valid {
+            color: #28a745;
+        }
+
+        .requirement-list li.valid i {
+            color: #28a745;
+        }
+
+</style>
+
 </head>
 <body>
 

@@ -40,7 +40,6 @@ class BookListCreateView(generics.ListCreateAPIView):
             'data': response.data
         }, status=status.HTTP_201_CREATED)
 
-
 # Retrieve, Update, and Delete View
 class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()

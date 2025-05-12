@@ -4,12 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from books.models import Book
 from .models import Review
-from reviews.apps import ReviewsConfig  # ensure it's correct
+from reviews.apps import ReviewsConfig 
+from users.decoraters import custom_login_required
 
 import logging
 logger = logging.getLogger(__name__)
 
-@login_required
+@custom_login_required
 def submit_review(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     existing_review = Review.objects.filter(user=request.user, book=book).first()
@@ -70,7 +71,7 @@ def submit_review(request, book_id):
 
     return render(request, 'reviews/submit_review.html', {'book': book})
 
-
+@custom_login_required
 def sentiment_counts(request, book_id):
     counts = Review.objects.filter(book_id=book_id).values('prediction').annotate(total=Count('id'))
     data = {"positive": 0, "neutral": 0, "negative": 0}

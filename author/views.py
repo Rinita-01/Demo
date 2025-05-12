@@ -12,7 +12,6 @@ def show_author(request):
     return render(request, 'author/author.html', {'authors': authors}) 
 
 
-
 class AuthorListCreation(generics.ListCreateAPIView):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer

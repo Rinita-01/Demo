@@ -19,10 +19,11 @@ import os
 # Razorpay client initialization
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
+@custom_login_required
 def payment(request):
     amount = request.POST.get("amount")
     return render(request, "payments/payment.html", {"amount": amount})
-
+    
 @custom_login_required 
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -101,6 +102,7 @@ def verify_payment(request):
                 "razorpay_payment_id": razorpay_payment_id,
                 "razorpay_signature": razorpay_signature,
             }
+            
             client.utility.verify_payment_signature(params_dict)
             print("✅ Payment verification successful!")
 

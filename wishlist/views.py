@@ -1,7 +1,9 @@
 from django.shortcuts import redirect, get_object_or_404, render
 from books.models import Book
 from .models import Wishlist
+from users.decoraters import custom_login_required
 
+@custom_login_required
 def add_to_wishlist(request, book_id):
     if not request.user.is_authenticated:
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -16,6 +18,7 @@ def add_to_wishlist(request, book_id):
 
     return redirect('show_wishlist')
 
+@custom_login_required
 def show_wishlist(request):
     if not request.user.is_authenticated:
         return redirect('login')  # redirect to login if user is not logged in
@@ -23,6 +26,7 @@ def show_wishlist(request):
     wishlist_items = Wishlist.objects.filter(user=request.user)
     return render(request, 'wishlist/wishlist.html', {'wishlist_items': wishlist_items})
 
+@custom_login_required
 def remove_from_wishlist(request, book_id):
     if not request.user.is_authenticated:
         return redirect('login')  # redirect to login if user is not logged in

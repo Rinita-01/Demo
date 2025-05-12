@@ -28,6 +28,11 @@
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-lg-12 mb-3">
+                            <label for="profile_picture">Profile Picture</label>
+                            <input type="file" name="profile_picture" class="form-control" id="profile_picture">
+                            <small id="profile_picture_error" class="text-danger"></small>
+                        </div>
+                        <div class="col-lg-12 mb-3">
                             <label for="first_name">First Name</label>
                             <input name="first_name" type="text" class="form-control" id="first_name" placeholder="First Name" onkeypress="return validatefirstname(event)">
                             <small id="first_name_error" class="text-danger"></small>
@@ -70,15 +75,20 @@
                             <input name="email" type="email" class="form-control" id="email" placeholder="Email" oninput="return validateemail(event)">
                             <small id="email_error" class="text-danger"></small>
                         </div>
-                        <div class="col-lg-12 mb-3">
+                        <div class="col-lg-12 pass-field">
                             <label for="password">Password</label>
-                            <input name="password" type="password" class="form-control" id="password" placeholder="Password" oninput="return validatepassword(event)">
-                            <small id="password_error" class="text-danger"></small>
+                            <input type="password" class="form-control" id="password" placeholder="Create password" style="margin-bottom: 0px;">
+                                <i class="fa-solid fa-eye"></i>
                         </div>
-                        <div class="col-lg-12 mb-3">
-                            <label for="profile_picture">Profile Picture</label>
-                            <input type="file" name="profile_picture" class="form-control" id="profile_picture">
-                            <small id="profile_picture_error" class="text-danger"></small>
+                        <div class="content" style="margin-bottom: 20px;">
+                            <p>Password must contain:</p>
+                            <ul class="requirement-list">
+                                <li><i class="fa-solid fa-circle"></i> <span>At least 8 characters</span></li>
+                                <li><i class="fa-solid fa-circle"></i> <span>At least 1 number (0–9)</span></li>
+                                <li><i class="fa-solid fa-circle"></i> <span>At least 1 lowercase letter (a–z)</span></li>
+                                <li><i class="fa-solid fa-circle"></i> <span>At least 1 special symbol (!@#$...)</span></li>
+                                <li><i class="fa-solid fa-circle"></i> <span>At least 1 uppercase letter (A–Z)</span></li>
+                            </ul>
                         </div>
                         <div class="col-lg-12">
                             <button type="submit" id="admin-Register-btn" class="filled-button">Register</button>
