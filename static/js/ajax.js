@@ -416,6 +416,7 @@ $(document).ready(function () {
             
 });
 
+// AJAX for Book Details
 $(document).ready(function () {
     const quantitySelect = $('#quantity');
     const priceElement = $('#book-price');

@@ -223,119 +223,6 @@ def logout(request):
 
 
 
-from django.http import JsonResponse
-from django.shortcuts import render
-
-from rest_framework.views import APIView
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework import exceptions
-
-from users.authentication import JWTAuthentication, create_access_token, create_refresh_token, decode_refresh_token
-from users.models import User
-from users.serializers import UserSerializer
-
-# User Registration through Class Based View
-class RegisterAPIView(APIView):
-    def post(self, request):
-        data = request.data
-
-        if data['password'] != data['password_confirm']:
-            raise exceptions.APIException('Passwords do not match!')
-
-        serializer = UserSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-# User Login
-class LoginAPIView(APIView):
-    def post(self, request: Request):
-        email = request.data['email']
-        password = request.data['password']
-        user = User.objects.filter(email=email).first()
-        if user is None:
-            raise exceptions.AuthenticationFailed('Invalid credentials')
-
-        if not user.check_password(password):
-            raise exceptions.AuthenticationFailed('Invalid credentials')
-        
-        access_token = create_access_token(user.id)
-        refresh_token = create_refresh_token(user.id)
-
-        response = Response()
-        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
-        response.data = {
-            'access_token': access_token,
-            'refresh_token': refresh_token
-        }
-        return response
-
-# Check Authenticated User
-class UserAPIView(APIView):
-    authentication_classes = [JWTAuthentication] # authentication_classes attribute is used to specify which Authentication is used
-
-    def get(self, request):
-        user = request.user
-        is_admin = request.auth.get('is_admin', False)
-        serializer = UserSerializer(user)
-        return Response({
-            'user': serializer.data,
-            'is_admin': is_admin
-        })
-
-# Generate new Access token using Refresh token
-# Access tokens usually have a short expiration time (e.g., 30 seconds).
-# Instead of asking the user to log in again, we use a refresh token to generate a new access token.
-class RefreshAPIView(APIView):
-    def post(self, request: Request):
-        refresh_token = request.COOKIES.get('refresh_token')
-        id = decode_refresh_token(refresh_token)
-        user = User.objects.get(pk=id)
-        access_token = create_access_token(user.id)
-        
-        return Response({
-            'user': UserSerializer(user).data,
-            'access_token': access_token
-        })
-
-# User Logout through Class Based View
-class LogoutAPIView(APIView):
-    def post(self, request: Request):
-        response: Response = Response()
-        response.delete_cookie('refresh_token')
-        response.data = {
-            'message': 'success'
-        }
-        return response
-
-# --------------------- Function Based View ---------------------
-# User Registration through Function Based View
-# def signup(request):
-#     if request.method == 'POST':
-#         data = request.POST
-#         if data['password'] != data['password_confirm']:
-#             raise exceptions.APIException('Passwords do not match!')
-
-#         serializer = UserSerializer(data=data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return JsonResponse({'acknowledge': 'Check your email for Activation link!', 'success': True, 'response': serializer.data}, status=200)
-#         # return Response(serializer.data)    
-    
-#     return render(request, 'account/user_register.html')
-
-# # User Logout through Function Based View
-# def api_logout(request):
-#     response = Response()
-#     response.delete_cookie('refresh_token')
-#     response.data = {
-#         'message': 'success'
-#     }
-#     return response
-
-
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -350,7 +237,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import login
 from .serializers import AdminLoginSerializer
-
 
 
 logger = logging.getLogger(__name__)

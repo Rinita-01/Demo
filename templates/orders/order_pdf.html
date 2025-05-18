@@ -99,32 +99,6 @@
             <div><strong>Status:</strong> {{ order.status }}</div>
         </div>
 
-        <div class="section">
-            <p><strong>Items Ordered:</strong></p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Book</th>
-                        <th>Image</th>
-                        <th>Quantity</th>
-                        <th>Price at Purchase</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for book in books %}
-                    <tr>
-                        <td>{{ book.title }}</td>
-                        <td>{{ book.quantity }}</td>
-                        <td>₹{{ book.price_at_purchase }}</td>
-                        <td>₹{{ book.total_price }}</td>
-                    </tr>
-                    {% endfor %}
-
-                </tbody>
-            </table>
-        </div>
-
         <div class="total-section">
             <strong>Total Price:</strong> ₹{{ order.total_price|floatformat:"2" }}
         </div>
